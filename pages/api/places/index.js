@@ -6,11 +6,9 @@ export default async function handler(request, response) {
 
   if (request.method === "GET") {
     const place = await Place.find();
-    response.status(200).json(place);
-    return;
-  }
 
-  if (request.method === "POST") {
+    return response.status(200).json(place);
+  } else if (request.method === "POST") {
     const place = request.body;
 
     const newPlace = {
@@ -23,7 +21,6 @@ export default async function handler(request, response) {
 
     await Place.create(newPlace);
 
-    response.status(200).json({ status: "New place created!" });
-    return;
+    return response.status(200).json({ status: "New place created!" });
   }
 }

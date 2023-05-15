@@ -5,39 +5,48 @@ export default async function handler(request, response) {
   await dbConnect();
   const { id } = request.query;
 
-  if (request.method === "GET") {
-    const place = await Place.findById(id);
+  switch (request.method) {
+    case "GET":
+      try {
+        const place = await Place.findById(id);
+        place
+          ? response.status(200).json(place)
+          : response.status(404).json({ status: "Not Found" });
+        return;
+      } catch {
+        response.status(500).json({ status: "Bad Response" });
+      }
 
-    if (!place) {
-      return response.status(404).json({ status: "Not Found" });
-    }
+    case "PATCH":
+      try {
+        const placeData = request.body;
+        await Place.findByIdAndUpdate(id, {
+          name: placeData.name,
+          location: placeData.location,
+          image: placeData.image,
+          mapURL: placeData.mapURL,
+          description: placeData.description,
+        });
+        placeData
+          ? response
+              .status(200)
+              .json({ status: "Place with id " + id + " changed!" })
+          : response.status(404).json({ status: "Not Found" });
+        return;
+      } catch {
+        response.status(500).json({ status: "Bad Response" });
+      }
 
-    response.status(200).json(place);
-    return;
+    case "DELETE":
+      try {
+        await Place.findByIdAndDelete(id);
+        return response
+          .status(200)
+          .json({ status: "Place with id " + id + " deleted!" });
+      } catch {
+        response.status(500).json({ status: "Bad Response" });
+      }
+    default:
+      return response.status(500).json({ status: "Method not implemented" });
   }
-
-  if (request.method === "PATCH") {
-    const placeData = request.body;
-
-    await Place.findByIdAndUpdate(id, {
-      name: placeData.name,
-      location: placeData.location,
-      image: placeData.image,
-      mapURL: placeData.mapURL,
-      description: placeData.description,
-    });
-
-    response.status(200).json({ status: "Place with id " + id + " changed!" });
-    return;
-  }
-
-  if (request.method === "DELETE") {
-    await Place.findByIdAndDelete(id);
-
-    response.status(200).json({ status: "Place with id " + id + " deleted!" });
-    return;
-  }
-
-  response.status(501).json({ status: "Method not implemented." });
-  return;
 }
