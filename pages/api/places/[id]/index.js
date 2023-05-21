@@ -27,14 +27,11 @@ export default async function handler(request, response) {
           mapURL: placeData.mapURL,
           description: placeData.description,
         });
-        placeData
-          ? response
-              .status(200)
-              .json({ status: "Place with id " + id + " changed!" })
-          : response.status(404).json({ status: "Not Found" });
-        return;
+        return response
+          .status(200)
+          .json({ status: "Place with id " + id + " changed!" });
       } catch {
-        response.status(500).json({ status: "Bad Response" });
+        return response.status(500).json({ status: "Bad Response" });
       }
 
     case "DELETE":
@@ -44,7 +41,7 @@ export default async function handler(request, response) {
           .status(200)
           .json({ status: "Place with id " + id + " deleted!" });
       } catch {
-        response.status(500).json({ status: "Bad Response" });
+        return response.status(500).json({ status: "Bad Response" });
       }
     default:
       return response.status(500).json({ status: "Method not implemented" });
